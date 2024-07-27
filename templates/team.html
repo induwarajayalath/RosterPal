@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roster Pal - Team Fetcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+            padding: 1rem;
+        }
+
+        form {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="date"],
+        input[type="text"],
+        select,
+        button {
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        .result h2 {
+            margin-top: 0;
+        }
+
+        .result pre {
+            background-color: #f4f4f4;
+            padding: 1rem;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        header {
+            background-color: rgb(168, 108, 220);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #333;
+            color: white;
+            position: relative;
+        }
+
+        @media (min-width: 600px) {
+
+            input[type="date"],
+            input[type="text"],
+            select {
+                width: auto;
+                display: inline-block;
+                margin-right: 1rem;
+            }
+
+            button {
+                width: auto;
+                display: inline-block;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="/">Home</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h1>Roster Pal Team Fetcher</h1>
+        <form id="dataForm">
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="date" required>
+            <label for="name">Enter Team:</label>
+            <input type="text" id="name" name="Team" value="Energy" required>
+            <label for="roster">Select Shift:</label>
+            <select id="roster" name="shift" required>
+                <option value="m">Morning</option>
+                <option value="a">Afternoon</option>
+                <option value="n">Night</option>
+            </select>
+            <button type="submit">Fetch Data</button>
+        </form>
+        <div class="result" id="result">
+            <h2>Response Data:</h2>
+            <pre id="responseData"></pre>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateInput = document.getElementById('date');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+        });
+
+        document.getElementById('dataForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Get values from the form
+            const date = document.getElementById('date').value;
+            const name = document.getElementById('name').value;
+            const roster = document.getElementById('roster').value;
+
+            // Format date to YYYY/MM/DD
+            const formattedDate = new Date(date).toISOString().split('T')[0].replace(/-/g, '/');
+
+            // Construct URL with route parameters
+            const url = `http://127.0.0.1:5000/listMembers/${formattedDate}/${name}/${roster}`;
+
+            // Make GET request
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Display data
+                    document.getElementById('responseData').textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('responseData').textContent = 'Error fetching data.';
+                });
+        });
+    </script>
+    <footer>
+        <p>&copy; 2024 Roster Pal. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

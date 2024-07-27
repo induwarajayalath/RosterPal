@@ -1,0 +1,131 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roster Pal - Your Ultimate Scheduling Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            height: 100%;
+            display: flex;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f4f4f9;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: rgb(168, 108, 220);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            margin: 0 1rem;
+            text-decoration: bold;
+        }
+
+        .hero {
+            background: url('{{ url_for("static", filename="images/Roster_Pal.png") }}') no-repeat center center/cover;
+            color: white;
+            text-align: center;
+            padding: 10rem 1rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin: 0;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+        }
+
+        .features {
+            display: flex;
+            justify-content: space-around;
+            padding: 2rem 1rem;
+            background-color: #ffffff;
+        }
+
+        .feature {
+            text-align: center;
+            width: 30%;
+        }
+
+        .feature i {
+            font-size: 3rem;
+            color: #007bff;
+        }
+
+        .feature h2 {
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #333;
+            color: white;
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <nav>
+            <a href="#">Home</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Welcome to Roster Pal</h1>
+        <p>Your Ultimate Scheduling Assistant</p>
+    </section>
+
+    <section class="features">
+        <div class="feature" id="navigatePersonal">
+            <i class="fas fa-calendar-alt"></i>
+            <h2>Find the Personal Roster</h2>
+            <p>Find your roster info</p>
+        </div>
+        <div class="feature" id="navigateTeam">
+            <i class="fas fa-users"></i>
+            <h2>Find the Roster Team</h2>
+            <p>Find who will be there today</p>
+        </div>
+    </section>
+
+
+    <script>
+        document.getElementById('navigatePersonal').addEventListener('click', function () {
+            // Redirect to another HTML file
+            window.location.href = 'personal';
+        });
+        document.getElementById('navigateTeam').addEventListener('click', function () {
+            // Redirect to another HTML file
+            window.location.href = 'team';
+        });
+    </script>
+    <footer>
+        <p>&copy; 2024 Roster Pal. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>
