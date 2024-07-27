@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
 
 df = pd.read_csv(
-    '/Users/induwarajayalath/Desktop/GenixLabs/Projects/RosterPal/US-SO-Roster.csv')
+    '/home/azureuser/RosterPal/US-SO-Roster.csv')
 
 
 def extract_names(search_param):
