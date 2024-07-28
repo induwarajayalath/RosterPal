@@ -7,62 +7,100 @@
     <title>Roster Pal - Team Fetcher</title>
     <style>
         body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #6a1b9a;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        header nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-weight: bold;
         }
 
         .container {
+            flex: 1;
             width: 90%;
-            max-width: 800px;
-            margin: auto;
-            padding: 1rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #6a1b9a;
         }
 
         form {
-            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
         }
 
         label {
-            display: block;
+            flex: 1 1 100%;
             margin-bottom: 0.5rem;
+            font-weight: bold;
         }
 
         input[type="date"],
         input[type="text"],
         select,
         button {
-            padding: 0.5rem;
+            flex: 1 1 100%;
+            padding: 0.75rem;
             margin-bottom: 1rem;
             font-size: 1rem;
-            width: 100%;
             box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
         button {
-            background-color: #007bff;
+            background-color: #6a1b9a;
             color: white;
             border: none;
             cursor: pointer;
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #5a1282;
         }
 
-        .result {
-            margin-top: 1.5rem;
-            padding: 1rem;
+        .result,
+        .verticle-display {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
             border: 1px solid #ddd;
-            background-color: #fff;
+            background-color: #fafafa;
+            border-radius: 8px;
         }
 
-        .result h2 {
+        .result h2,
+        .verticle-display h2 {
             margin-top: 0;
+            color: #6a1b9a;
         }
 
-        .result pre {
+        .result pre,
+        .verticle-display p {
             background-color: #f4f4f4;
             padding: 1rem;
             border-radius: 4px;
@@ -70,11 +108,49 @@
             word-wrap: break-word;
         }
 
-        header {
-            background-color: rgb(168, 108, 220);
-            color: white;
-            padding: 2rem;
-            text-align: center;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f5f5f5;
+        }
+
+        @media (min-width: 600px) {
+            form {
+                flex-wrap: nowrap;
+                align-items: center;
+            }
+
+            label {
+                flex: 1 0 auto;
+                margin-bottom: 0;
+                margin-right: 1rem;
+            }
+
+            input[type="date"],
+            input[type="text"],
+            select,
+            button {
+                flex: 1 0 auto;
+                margin-bottom: 0;
+                margin-right: 1rem;
+            }
+
+            button {
+                margin-right: 0;
+            }
         }
 
         footer {
@@ -82,24 +158,7 @@
             padding: 1rem;
             background-color: #333;
             color: white;
-            position: relative;
-        }
-
-        @media (min-width: 600px) {
-
-            input[type="date"],
-            input[type="text"],
-            select {
-                width: auto;
-                display: inline-block;
-                margin-right: 1rem;
-            }
-
-            button {
-                width: auto;
-                display: inline-block;
-                margin-right: 0;
-            }
+            margin-top: auto;
         }
     </style>
 </head>
@@ -110,6 +169,7 @@
             <a href="/">Home</a>
         </nav>
     </header>
+
     <div class="container">
         <h1>Roster Pal Team Fetcher</h1>
         <form id="dataForm">
@@ -129,6 +189,20 @@
             <h2>Response Data:</h2>
             <pre id="responseData"></pre>
         </div>
+        <div class="verticle-display" id="verticleDisplay">
+            <h2>Verticle Value:</h2>
+            <p id="verticleValue"></p>
+        </div>
+        <table class="members-table" id="membersTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody id="membersTableBody">
+            </tbody>
+        </table>
     </div>
 
     <script>
@@ -156,15 +230,71 @@
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    // Display data
-                    document.getElementById('responseData').textContent = JSON.stringify(data, null, 2);
+                    // Initialize variables for Verticle and Members
+                    let verticleValue = '';
+                    let members = [];
+
+                    // Iterate through the response data
+                    data.forEach(item => {
+                        if (item.hasOwnProperty('Verticle')) {
+                            verticleValue = item.Verticle;
+                        } else if (item.hasOwnProperty('name') && item.hasOwnProperty('role')) {
+                            members.push(item);
+                        }
+                    });
+
+                    // Display Verticle value if available
+                    if (verticleValue) {
+                        const verticleDisplay = document.getElementById('verticleDisplay');
+                        const verticleValueElem = document.getElementById('verticleValue');
+                        verticleValueElem.textContent = verticleValue;
+                        verticleDisplay.style.display = 'block';
+
+                        // Hide the response data area
+                        document.getElementById('result').style.display = 'none';
+                    } else {
+                        // Display the raw response data if no Verticle key is found
+                        const responseData = document.getElementById('responseData');
+                        responseData.textContent = JSON.stringify(data, null, 2);
+                        document.getElementById('result').style.display = 'block';
+
+                        const verticleDisplay = document.getElementById('verticleDisplay');
+                        verticleDisplay.style.display = 'none';
+                    }
+
+                    // Display members in the table
+                    if (members.length > 0) {
+                        const membersTable = document.getElementById('membersTable');
+                        const membersTableBody = document.getElementById('membersTableBody');
+                        membersTableBody.innerHTML = ''; // Clear previous table rows
+
+                        members.forEach(member => {
+                            const row = document.createElement('tr');
+                            const nameCell = document.createElement('td');
+                            const roleCell = document.createElement('td');
+
+                            nameCell.textContent = member.name;
+                            roleCell.textContent = member.role;
+
+                            row.appendChild(nameCell);
+                            row.appendChild(roleCell);
+                            membersTableBody.appendChild(row);
+                        });
+
+                        membersTable.style.display = 'table';
+                    } else {
+                        const membersTable = document.getElementById('membersTable');
+                        membersTable.style.display = 'none';
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
                     document.getElementById('responseData').textContent = 'Error fetching data.';
+                    document.getElementById('result').style.display = 'block';
                 });
         });
     </script>
+
     <footer>
         <p>&copy; 2024 Roster Pal. All rights reserved.</p>
     </footer>
