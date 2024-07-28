@@ -34,9 +34,9 @@ if __name__ == '__main__':
     app.run(debug=False)
 
 
-df = pd.read_csv(
-    '/Users/induwarajayalath/Desktop/GenixLabs/Projects/RosterPal/US-SO-Roster.csv')
-# df = pd.read_csv('/home/azureuser/RosterPal/US-SO-Roster.csv')
+# df = pd.read_csv(
+ #    '/Users/induwarajayalath/Desktop/GenixLabs/Projects/RosterPal/US-SO-Roster.csv')
+df = pd.read_csv('/home/azureuser/RosterPal/US-SO-Roster.csv')
 
 
 def extract_names(search_param):
