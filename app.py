@@ -122,3 +122,44 @@ def listMembers(year, month, date, verticle, shift):
         })
 
     return jsonify(result)
+
+
+@app.route('/getAlarms/<int:year>/<int:month>/<int:date>/<name>', methods=['GET'])
+def getRoster(name, year, month, date):
+    name = extract_names(name)
+    if len(name) > 1:
+        print('There are multiple matches. Please select one and re run - ')
+        return name
+    elif len(name) == 1:
+        name = name[0]
+    elif len(name) == 0:
+        return 'Error occured'
+    dayNumber = returnDay(year, month, date)
+    result = df.isin([name])
+    positions = list(zip(*result.to_numpy().nonzero()))
+
+    if positions:
+        for position in positions:
+            row, col = position
+            row_number = row
+    else:
+        print(f"Value '{name}' not found in the DataFrame")
+    value = df.iloc[row_number, dayNumber]
+    alarm1 = ''
+    alarm2 = ''
+    if value == 'm':
+        alarm1 = '7:00'
+        alarm2 = '8:00'
+    elif value == 'a':
+        alarm1 = '14:00'
+        alarm2 = '15:00'
+    elif value == 'n':
+        alarm1 = '22:00'
+        alarm2 = '23:00'
+    else:
+        alarm1 = 'null'
+    result = [{
+        'alarm1': alarm1,
+        'alarm2': alarm2
+    }]
+    return result
