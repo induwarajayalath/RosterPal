@@ -34,9 +34,9 @@ if __name__ == '__main__':
     app.run(debug=False)
 
 
-# df = pd.read_csv(
-    # '/Users/induwarajayalath/Desktop/GenixLabs/Projects/RosterPal/US-SO-Roster.csv')
-df = pd.read_csv('/home/azureuser/RosterPal/US-SO-Roster.csv')
+df = pd.read_csv(
+    '/Users/induwarajayalath/Desktop/GenixLabs/Projects/RosterPal/US-SO-Roster.csv')
+# df = pd.read_csv('/home/azureuser/RosterPal/US-SO-Roster.csv')
 
 
 def extract_names(search_param):
@@ -125,7 +125,7 @@ def listMembers(year, month, date, verticle, shift):
 
 
 @app.route('/getAlarms/<int:year>/<int:month>/<int:date>/<name>', methods=['GET'])
-def getRoster(name, year, month, date):
+def getAlarms(name, year, month, date):
     name = extract_names(name)
     if len(name) > 1:
         print('There are multiple matches. Please select one and re run - ')
