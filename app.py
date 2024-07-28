@@ -127,13 +127,15 @@ def listMembers(year, month, date, verticle, shift):
 @app.route('/getAlarms/<int:year>/<int:month>/<int:date>/<name>', methods=['GET'])
 def getAlarms(name, year, month, date):
     name = extract_names(name)
-    if len(name) > 1:
-        print('There are multiple matches. Please select one and re run - ')
-        return name
-    elif len(name) == 1:
+    if len(name) == 1:
         name = name[0]
-    elif len(name) == 0:
-        return 'Error occured'
+    else:
+        result = [{
+            'alarm1': '6:30',
+            'alarm2': '6:59',
+            'shift': 'Error Occured'
+        }]
+        return result
     dayNumber = returnDay(year, month, date)
     result = df.isin([name])
     positions = list(zip(*result.to_numpy().nonzero()))
@@ -148,18 +150,24 @@ def getAlarms(name, year, month, date):
     alarm1 = ''
     alarm2 = ''
     if value == 'm':
-        alarm1 = '7:00'
-        alarm2 = '8:00'
+        alarm1 = '6:00'
+        alarm2 = '6:59'
+        value = 'Morning'
     elif value == 'a':
         alarm1 = '14:00'
-        alarm2 = '15:00'
+        alarm2 = '14:59'
+        value = 'Afternoon'
     elif value == 'n':
         alarm1 = '22:00'
-        alarm2 = '23:00'
+        alarm2 = '22:59'
+        value = 'Night'
     else:
         alarm1 = 'null'
+        alarm2 = 'null'
+        value = 'Shift Leave'
     result = [{
         'alarm1': alarm1,
-        'alarm2': alarm2
+        'alarm2': alarm2,
+        'shift': value
     }]
     return result
