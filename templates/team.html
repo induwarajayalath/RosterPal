@@ -150,7 +150,7 @@
             const formattedDate = new Date(date).toISOString().split('T')[0].replace(/-/g, '/');
 
             // Construct URL with route parameters
-            const url = `http://127.0.0.1:5000/listMembers/${formattedDate}/${name}/${roster}`;
+            const url = `http://52.170.150.51/listMembers/${formattedDate}/${name}/${roster}`;
 
             // Make GET request
             fetch(url)
