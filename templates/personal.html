@@ -207,8 +207,8 @@
             const formattedDate = new Date(date).toISOString().split('T')[0].replace(/-/g, '/');
 
             // Construct URL with route parameters
-            // const url = `http://rosterpal.induwara.me/getRoster/${formattedDate}/${name}`;
-            const url = `http://127.0.0.1:5000/getRoster/${formattedDate}/${name}`;
+            const url = `http://rosterpal.induwara.me/getRoster/${formattedDate}/${name}`;
+            //const url = `http://127.0.0.1:5000/getRoster/${formattedDate}/${name}`;
 
             // Make GET request
             fetch(url)

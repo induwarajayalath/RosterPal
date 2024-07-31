@@ -1,0 +1,4 @@
+ssh -i ~/.ssh/InduwaraJ_key.pem azureuser@52.170.150.51
+
+
+https://github.com/yeshwanthlm/YouTube/blob/main/flask-on-aws-ec2.md
