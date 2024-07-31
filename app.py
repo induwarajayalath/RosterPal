@@ -34,9 +34,9 @@ if __name__ == '__main__':
     app.run(debug=False)
 
 
-# df = pd.read_csv(
- #    '/Users/induwarajayalath/Desktop/GenixLabs/Projects/RosterPal/US-SO-Roster.csv')
-df = pd.read_csv('/home/azureuser/RosterPal/US-SO-Roster.csv')
+df = pd.read_csv(
+    '/Users/induwarajayalath/Desktop/GenixLabs/Projects/RosterPal/US-SO-Roster.csv')
+# df = pd.read_csv('/home/azureuser/RosterPal/US-SO-Roster.csv')
 
 
 def extract_names(search_param):
@@ -60,15 +60,39 @@ def extract_team(search_param):
 
 def returnDay(year, month, day):
     date = datetime.datetime(year, month, day)
+    # Since there are four columns to skip
     day_of_year = date.timetuple().tm_yday + 4
+    day_of_year += 175  # since the CSV is from 10th of JULY
     return day_of_year
+
+
+def clean_shift(shift):
+    if isinstance(shift, str):  # Check if shift is a string
+        if 'm' in shift:
+            return 'm'
+        elif 'a' in shift:
+            return 'a'
+        elif 'n' in shift:
+            return 'n'
+    return None
+
+
+def clean_shift_leave(shift):
+    if isinstance(shift, str):  # Check if shift is a string
+        if 'f' in shift:
+            return 'Full Day'
+        elif 'h' in shift:
+            return 'Half Day'
+        elif 's' in shift:
+            return 'Short Leave'
+    return ''
 
 
 @app.route('/getRoster/<int:year>/<int:month>/<int:date>/<name>', methods=['GET'])
 def getRoster(name, year, month, date):
     name = extract_names(name)
     if len(name) > 1:
-        print('There are multiple matches. Please select one and re run - ')
+        # print('There are multiple matches. Please select one and re run - ')
         return name
     elif len(name) == 1:
         name = name[0]
@@ -82,22 +106,33 @@ def getRoster(name, year, month, date):
         for position in positions:
             row, col = position
             row_number = row
-    else:
-        print(f"Value '{name}' not found in the DataFrame")
+    # else:
+    #     print(f"Value '{name}' not found in the DataFrame")
     value = df.iloc[row_number, dayNumber]
-    if value == 'm':
+    value_for_leave = value
+    leave = ''
+    if 'm' in value:
         value = 'Morning'
-    elif value == 'a':
+    elif 'a' in value:
         value = 'Afternoon'
-    elif value == 'n':
+    elif 'n' in value:
         value = 'Night'
-    elif value == 'x':
+    elif 'x' in value:
         value = 'Shift Leave'
+        leave = '-'
     else:
         value = 'No Data :('
+
+    if 'h' in value_for_leave:
+        leave = 'Half Day'
+    elif 's' in value_for_leave:
+        leave = 'Short Leave'
+    elif 'f' in value_for_leave:
+        leave = 'Full Day'
     result = [{
         'Name': name,
-        'Shift': value
+        'Shift': value,
+        'Leave': leave
     }]
     return result
 
@@ -109,18 +144,27 @@ def listMembers(year, month, date, verticle, shift):
         return team
     dayNumber = returnDay(year, month, date)
 
-    filtered_df = df[(df.iloc[:, dayNumber] == shift)
+    # filtered_df = df[(df.iloc[:, dayNumber].apply(clean_shift) == shift)
+    #                  & (df.iloc[:, 0] == team[0])]
+
+    # filtered_df = df[df.iloc[:, dayNumber].apply(clean_shift) == shift
+    #                  & (df.iloc[:, 0] == team[0])]
+
+    filtered_df = df[df.iloc[:, dayNumber].apply(lambda x: clean_shift(x) == shift)
                      & (df.iloc[:, 0] == team[0])]
 
     role = filtered_df['Job Role']
     name = filtered_df['Name']
+    cap = filtered_df['Capabilities'].fillna('')
+    leave = filtered_df.iloc[:, dayNumber].apply(clean_shift_leave)
     result = [{'Verticle': team[0]}]
     for i in range(len(name)):
         result.append({
             'role': role.iloc[i],
-            'name': name.iloc[i]
+            'name': name.iloc[i],
+            'leave': leave.iloc[i],
+            'cap': cap.iloc[i]
         })
-
     return jsonify(result)
 
 
@@ -144,8 +188,8 @@ def getAlarms(name, year, month, date):
         for position in positions:
             row, col = position
             row_number = row
-    else:
-        print(f"Value '{name}' not found in the DataFrame")
+    # else:
+    #     print(f"Value '{name}' not found in the DataFrame")
     value = df.iloc[row_number, dayNumber]
     alarm1 = ''
     alarm2 = ''

@@ -190,7 +190,7 @@
             <pre id="responseData"></pre>
         </div>
         <div class="verticle-display" id="verticleDisplay">
-            <h2>Verticle Value:</h2>
+            <h2>Verticle:</h2>
             <p id="verticleValue"></p>
         </div>
         <table class="members-table" id="membersTable">
@@ -198,6 +198,8 @@
                 <tr>
                     <th>Name</th>
                     <th>Role</th>
+                    <th>Capability</th>
+                    <th>Leave</th>
                 </tr>
             </thead>
             <tbody id="membersTableBody">
@@ -224,7 +226,8 @@
             const formattedDate = new Date(date).toISOString().split('T')[0].replace(/-/g, '/');
 
             // Construct URL with route parameters
-            const url = `http://rosterpal.induwara.me/listMembers/${formattedDate}/${name}/${roster}`;
+            // const url = `http://rosterpal.induwara.me/listMembers/${formattedDate}/${name}/${roster}`;
+            const url = `http://127.0.0.1:5000/listMembers/${formattedDate}/${name}/${roster}`;
 
             // Make GET request
             fetch(url)
@@ -272,12 +275,18 @@
                             const row = document.createElement('tr');
                             const nameCell = document.createElement('td');
                             const roleCell = document.createElement('td');
+                            const capCell = document.createElement('td');
+                            const leaveCell = document.createElement('td');
 
                             nameCell.textContent = member.name;
                             roleCell.textContent = member.role;
+                            capCell.textContent = member.cap;
+                            leaveCell.textContent = member.leave;
 
                             row.appendChild(nameCell);
                             row.appendChild(roleCell);
+                            row.appendChild(capCell);
+                            row.appendChild(leaveCell);
                             membersTableBody.appendChild(row);
                         });
 
