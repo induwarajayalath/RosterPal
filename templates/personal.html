@@ -159,7 +159,7 @@
     </header>
 
     <div class="container">
-        <h1>Roster Pal Data Fetcher</h1>
+        <h1>Roster Pal - Personal</h1>
         <form id="dataForm">
             <label for="date">Select Date:</label>
             <input type="date" id="date" name="date" required>
@@ -168,11 +168,11 @@
             <button type="submit">Fetch Data</button>
         </form>
         <div class="result" id="result">
-            <h2>Response Data:</h2>
+            <h2>Shift Pattern:</h2>
             <table id="responseTable">
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Date</th>
                         <th>Shift</th>
                         <th>Leave</th>
                     </tr>
@@ -206,15 +206,13 @@
             // Format date to YYYY/MM/DD
             const formattedDate = new Date(date).toISOString().split('T')[0].replace(/-/g, '/');
 
-            // Construct URL with route parameters
+            // const url = `http://127.0.0.1:5000/getRoster/${formattedDate}/${name}`;
             const url = `http://rosterpal.induwara.me/getRoster/${formattedDate}/${name}`;
-            //const url = `http://127.0.0.1:5000/getRoster/${formattedDate}/${name}`;
 
             // Make GET request
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    // Display data
                     const result = document.getElementById('result');
                     const responseTableBody = document.getElementById('responseTable').querySelector('tbody');
                     const responseText = document.getElementById('responseText');
@@ -223,33 +221,46 @@
                     responseTableBody.innerHTML = '';
                     responseText.textContent = '';
 
-                    // Check if data contains objects with 'Name' key
-                    if (Array.isArray(data) && data.some(item => typeof item === 'object' && 'Name' in item)) {
-                        data.forEach(item => {
-                            if ('Name' in item) {
-                                const row = document.createElement('tr');
-                                const nameCell = document.createElement('td');
-                                nameCell.textContent = item.Name;
-                                const shiftCell = document.createElement('td');
-                                shiftCell.textContent = item.Shift;
-                                const leaveCell = document.createElement('td');
-                                leaveCell.textContent = item.Leave;
-                                row.appendChild(nameCell);
-                                row.appendChild(shiftCell);
-                                row.appendChild(leaveCell);
-                                responseTableBody.appendChild(row);
+                    // Check if data is an array and has objects with the 'Date' key
+                    if (Array.isArray(data) && data.length > 0 && Array.isArray(data[1]) && data[1].length > 0 && 'Date' in data[1][0]) {
+                        // Add the name row
+                        const nameRow = document.createElement('tr');
+                        const nameCell = document.createElement('td');
+                        nameCell.colSpan = 3;
+                        nameCell.innerHTML = `Name: ${data[0].Name}<br>Roster: ${data[0].Roster}`;
+                        nameCell.style.fontWeight = 'bold';
+                        nameRow.appendChild(nameCell);
+                        responseTableBody.appendChild(nameRow);
+
+                        // Populate the table with the rest of the data
+                        data.slice(1).forEach(itemArray => {
+                            if (Array.isArray(itemArray)) {
+                                itemArray.forEach(item => {
+                                    const row = document.createElement('tr');
+                                    const dateCell = document.createElement('td');
+                                    dateCell.textContent = item.Date;
+                                    const shiftCell = document.createElement('td');
+                                    shiftCell.textContent = item.Shift;
+                                    const leaveCell = document.createElement('td');
+                                    leaveCell.textContent = item.Leave;
+                                    row.appendChild(dateCell);
+                                    row.appendChild(shiftCell);
+                                    row.appendChild(leaveCell);
+                                    responseTableBody.appendChild(row);
+                                });
                             }
                         });
-                        responseTableBody.style.display = 'table-row-group';
+
+                        // Hide the response text and show the table
                         responseText.style.display = 'none';
+                        result.style.display = 'block';
+                        responseTableBody.style.display = '';  // Resets to default display value
                     } else {
+                        // Display raw JSON data if the structure is unexpected
                         responseText.textContent = JSON.stringify(data, null, 2);
                         responseTableBody.style.display = 'none';
                         responseText.style.display = 'block';
                     }
-
-                    // Make result visible
-                    result.style.display = 'block';
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);

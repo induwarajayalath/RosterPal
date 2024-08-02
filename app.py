@@ -2,7 +2,9 @@
 # An object of Flask class is our WSGI application.
 from flask import Flask, jsonify, render_template
 import datetime
+from datetime import date, timedelta
 import pandas as pd
+import os
 
 # Flask constructor takes the name of
 # current module (__name__) as argument.
@@ -14,7 +16,7 @@ app = Flask(__name__)
 
 
 @app.route('/')
-# ‘/’ URL is bound with home() function.
+# ‘/’ URL is bound with home() fu nction.
 def home():
     return render_template('index.html')
 
@@ -33,10 +35,9 @@ def team():
 if __name__ == '__main__':
     app.run(debug=False)
 
-
-# df = pd.read_csv(
-    # '/Users/induwarajayalath/Desktop/GenixLabs/Projects/RosterPal/US-SO-Roster.csv')
-df = pd.read_csv('/home/azureuser/RosterPal/US-SO-Roster.csv')
+CSV_FILE_PATH = os.path.join(os.path.dirname(__file__), 'US-SO-Roster.csv')
+print(CSV_FILE_PATH)
+df = pd.read_csv(CSV_FILE_PATH)
 
 
 def extract_names(search_param):
@@ -60,9 +61,9 @@ def extract_team(search_param):
 
 def returnDay(year, month, day):
     date = datetime.datetime(year, month, day)
-    # Since there are four columns to skip
-    day_of_year = date.timetuple().tm_yday + 4
+    day_of_year = date.timetuple().tm_yday
     day_of_year += 175  # since the CSV is from 10th of JULY
+    day_of_year += 4  # Since there are four columns to skip
     return day_of_year
 
 
@@ -88,6 +89,41 @@ def clean_shift_leave(shift):
     return ''
 
 
+def determine_shift(value):
+    if isinstance(value, str):
+        if 'm' in value:
+            return 'Morning'
+        elif 'a' in value:
+            return 'Afternoon'
+        elif 'n' in value:
+            return 'Night'
+        elif 'x' in value:
+            return 'Shift Leave'
+        else:
+            return 'No Data :('
+    return ''
+
+
+def determine_alarms(value):
+    if value == 'm':
+        alarm1 = '6:00'
+        alarm2 = '6:59'
+        shift = 'Morning'
+    elif value == 'a':
+        alarm1 = '14:00'
+        alarm2 = '14:59'
+        shift = 'Afternoon'
+    elif value == 'n':
+        alarm1 = '22:00'
+        alarm2 = '22:59'
+        shift = 'Night'
+    else:
+        alarm1 = 'null'
+        alarm2 = 'null'
+        shift = 'Shift Leave'
+    return shift, alarm1, alarm2
+
+
 @app.route('/getRoster/<int:year>/<int:month>/<int:date>/<name>', methods=['GET'])
 def getRoster(name, year, month, date):
     name = extract_names(name)
@@ -101,40 +137,29 @@ def getRoster(name, year, month, date):
     dayNumber = returnDay(year, month, date)
     result = df.isin([name])
     positions = list(zip(*result.to_numpy().nonzero()))
-
     if positions:
         for position in positions:
             row, col = position
             row_number = row
+    to_return = [{
+        'Name': name,
+        'Roster': df.iloc[row_number, 1]
+    }]
     # else:
     #     print(f"Value '{name}' not found in the DataFrame")
-    value = df.iloc[row_number, dayNumber]
-    value_for_leave = value
-    leave = ''
-    if 'm' in value:
-        value = 'Morning'
-    elif 'a' in value:
-        value = 'Afternoon'
-    elif 'n' in value:
-        value = 'Night'
-    elif 'x' in value:
-        value = 'Shift Leave'
-        leave = '-'
-    else:
-        value = 'No Data :('
-
-    if 'h' in value_for_leave:
-        leave = 'Half Day'
-    elif 's' in value_for_leave:
-        leave = 'Short Leave'
-    elif 'f' in value_for_leave:
-        leave = 'Full Day'
-    result = [{
-        'Name': name,
-        'Shift': value,
-        'Leave': leave
-    }]
-    return result
+    for i in range(7):
+        value = df.iloc[row_number, dayNumber+i]
+        shift = determine_shift(value)
+        leave = clean_shift_leave(value)
+        original_date = datetime.date(int(year), int(month), int(date))
+        new_date = original_date + timedelta(days=i)
+        result = [{
+            'Date': new_date.strftime("%A, %d/%b/%Y"),
+            'Shift': shift,
+            'Leave': leave
+        }]
+        to_return.append(result)
+    return to_return
 
 
 @app.route('/listMembers/<int:year>/<int:month>/<int:date>/<verticle>/<shift>', methods=['GET'])
@@ -191,27 +216,10 @@ def getAlarms(name, year, month, date):
     # else:
     #     print(f"Value '{name}' not found in the DataFrame")
     value = df.iloc[row_number, dayNumber]
-    alarm1 = ''
-    alarm2 = ''
-    if value == 'm':
-        alarm1 = '6:00'
-        alarm2 = '6:59'
-        value = 'Morning'
-    elif value == 'a':
-        alarm1 = '14:00'
-        alarm2 = '14:59'
-        value = 'Afternoon'
-    elif value == 'n':
-        alarm1 = '22:00'
-        alarm2 = '22:59'
-        value = 'Night'
-    else:
-        alarm1 = 'null'
-        alarm2 = 'null'
-        value = 'Shift Leave'
+    shift, alarm1, alarm2 = determine_shift(value)
     result = [{
         'alarm1': alarm1,
         'alarm2': alarm2,
-        'shift': value
+        'shift': shift
     }]
     return result
