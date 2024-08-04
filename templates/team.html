@@ -176,7 +176,7 @@
             <label for="date">Select Date:</label>
             <input type="date" id="date" name="date" required>
             <label for="name">Enter Team:</label>
-            <input type="text" id="name" name="Team" value="Energy">
+            <input type="text" id="name" name="Team" value="Energy" required>
             <label for="roster">Select Shift:</label>
             <select id="roster" name="shift" required>
                 <option value="m">Morning</option>
@@ -185,6 +185,7 @@
             </select>
             <button type="submit">Fetch Data</button>
         </form>
+        <p>Type * in 'Enter Team' section to filterout all the people in the current shift</p>
         <div class="result" id="result">
             <h2>Response Data:</h2>
             <pre id="responseData"></pre>
