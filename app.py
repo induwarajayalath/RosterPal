@@ -124,6 +124,18 @@ def determine_alarms(value):
     return shift, alarm1, alarm2
 
 
+def check_and_assign(value):
+    if pd.isna(value):
+        return 'No Role'  # Return the default value if it's NaN
+    try:
+        # Try converting the value to a number
+        float(value)
+        return 'No Role'  # Return the default value if it's a number
+    except ValueError:
+        # Return the original value if it's not a number
+        return value
+
+
 @app.route('/getRoster/<int:year>/<int:month>/<int:date>/<name>', methods=['GET'])
 def getRoster(name, year, month, date):
     name = extract_names(name)
@@ -164,32 +176,34 @@ def getRoster(name, year, month, date):
 
 @app.route('/listMembers/<int:year>/<int:month>/<int:date>/<verticle>/<shift>', methods=['GET'])
 def listMembers(year, month, date, verticle, shift):
-    team = extract_team(verticle)
-    if len(team) > 1:
-        return team
     dayNumber = returnDay(year, month, date)
-
-    # filtered_df = df[(df.iloc[:, dayNumber].apply(clean_shift) == shift)
-    #                  & (df.iloc[:, 0] == team[0])]
-
-    # filtered_df = df[df.iloc[:, dayNumber].apply(clean_shift) == shift
-    #                  & (df.iloc[:, 0] == team[0])]
-
-    filtered_df = df[df.iloc[:, dayNumber].apply(lambda x: clean_shift(x) == shift)
-                     & (df.iloc[:, 0] == team[0])]
+    if verticle == '*':
+        team = ['All teams']
+        filtered_df = df[df.iloc[:, dayNumber].apply(
+            lambda x: clean_shift(x) == shift)]
+        print('Before *')
+    else:
+        team = extract_team(verticle)
+        if len(team) > 1:
+            return team
+        filtered_df = df[df.iloc[:, dayNumber].apply(
+            lambda x: clean_shift(x) == shift) & (df.iloc[:, 0] == team[0])]
 
     role = filtered_df['Job Role']
     name = filtered_df['Name']
     cap = filtered_df['Capabilities'].fillna('')
     leave = filtered_df.iloc[:, dayNumber].apply(clean_shift_leave)
     result = [{'Verticle': team[0]}]
+
     for i in range(len(name)):
+        role_value = check_and_assign(role.iloc[i])
         result.append({
-            'role': role.iloc[i],
+            'role': role_value,
             'name': name.iloc[i],
             'leave': leave.iloc[i],
             'cap': cap.iloc[i]
         })
+
     return jsonify(result)
 
 
