@@ -36,8 +36,8 @@
 
         .container {
             flex: 1;
-            width: 90%;
-            max-width: 800px;
+            width: 98%;
+            max-width: 1000px;
             margin: 2rem auto;
             padding: 1.5rem;
             background-color: white;
@@ -52,11 +52,14 @@
 
         form {
             margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         label {
-            display: block;
-            margin-bottom: 0.5rem;
+            margin-right: 0.5rem;
             font-weight: bold;
         }
 
@@ -64,12 +67,11 @@
         input[type="text"],
         button {
             padding: 0.75rem;
-            margin-bottom: 1.5rem;
             font-size: 1rem;
-            width: 100%;
-            box-sizing: border-box;
             border: 1px solid #ddd;
             border-radius: 4px;
+            flex: 1;
+            min-width: 150px;
         }
 
         button {
@@ -77,6 +79,8 @@
             color: white;
             border: none;
             cursor: pointer;
+            flex: none;
+            width: auto;
         }
 
         button:hover {
@@ -135,17 +139,8 @@
                 width: 80%;
             }
 
-            input[type="date"],
-            input[type="text"],
-            button {
-                width: auto;
-                margin-right: 1rem;
-                display: inline-block;
-            }
-
-            button {
-                width: auto;
-                margin-top: 0;
+            form {
+                justify-content: space-between;
             }
         }
     </style>
@@ -160,11 +155,14 @@
 
     <div class="container">
         <h1>Roster Pal - Personal</h1>
-        <form id="dataForm">
+        <form id="dataForm" onsubmit="handleSubmit(event)">
             <label for="date">Select Date:</label>
             <input type="date" id="date" name="date" required>
             <label for="name">Enter Name:</label>
             <input type="text" id="name" name="name" required>
+            <label for="setDefault">
+                <input type="checkbox" id="setDefault"> Set Default
+            </label>
             <button type="submit">Fetch Data</button>
         </form>
         <div class="result" id="result">
@@ -194,11 +192,53 @@
             const dateInput = document.getElementById('date');
             const today = new Date().toISOString().split('T')[0];
             dateInput.value = today;
+
+            // Apply cookie value to the name field if it exists
+            applyCookie();
         });
 
-        document.getElementById('dataForm').addEventListener('submit', function (event) {
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function applyCookie() {
+            var cookieValue = getCookie('myNameCookie');
+            if (cookieValue) {
+                document.getElementById('name').value = cookieValue;
+            }
+        }
+
+        function handleSubmit(event) {
             event.preventDefault();
 
+            const setDefault = document.getElementById('setDefault').checked;
+            const name = document.getElementById('name').value;
+
+            if (setDefault) {
+                setCookie('myNameCookie', name, 7); // Save the name in the cookie for 7 days
+            }
+
+            fetchData();
+        }
+
+        function fetchData() {
             // Get values from the form
             const date = document.getElementById('date').value;
             const name = document.getElementById('name').value;
@@ -206,7 +246,7 @@
             // Format date to YYYY/MM/DD
             const formattedDate = new Date(date).toISOString().split('T')[0].replace(/-/g, '/');
 
-            // const url = `http://127.0.0.1:5000/getRoster/${formattedDate}/${name}`;
+            //const url = `http://127.0.0.1:5000/getRoster/${formattedDate}/${name}`;
             const url = `http://rosterpal.induwara.me/getRoster/${formattedDate}/${name}`;
 
             // Make GET request
@@ -254,7 +294,7 @@
                         // Hide the response text and show the table
                         responseText.style.display = 'none';
                         result.style.display = 'block';
-                        responseTableBody.style.display = '';  // Resets to default display value
+                        responseTableBody.style.display = ''; // Resets to default display value
                     } else {
                         // Display raw JSON data if the structure is unexpected
                         responseText.textContent = JSON.stringify(data, null, 2);
@@ -279,7 +319,7 @@
                     const result = document.getElementById('result');
                     result.style.display = 'block';
                 });
-        });
+        }
     </script>
 </body>
 
