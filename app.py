@@ -35,9 +35,10 @@ def team():
 if __name__ == '__main__':
     app.run(debug=False)
 
-CSV_FILE_PATH = os.path.join(os.path.dirname(__file__), 'US-SO-Roster.csv')
+CSV_FILE_PATH = os.path.join(os.path.dirname(
+    __file__), 'US-SO-Roster(Data).csv')
 print(CSV_FILE_PATH)
-df = pd.read_csv(CSV_FILE_PATH)
+df = pd.read_csv(CSV_FILE_PATH, encoding='ISO-8859-1')
 
 
 def extract_names(search_param):
@@ -145,7 +146,7 @@ def getRoster(name, year, month, date):
     elif len(name) == 1:
         name = name[0]
     elif len(name) == 0:
-        return 'Error occured'
+        return 'Nothing was found or Something went wrong'
     dayNumber = returnDay(year, month, date)
     result = df.isin([name])
     positions = list(zip(*result.to_numpy().nonzero()))
@@ -155,7 +156,8 @@ def getRoster(name, year, month, date):
             row_number = row
     to_return = [{
         'Name': name,
-        'Roster': df.iloc[row_number, 1]
+        'Roster': df.iloc[row_number, 1],
+        'Capability': df.iloc[row_number, 4] if pd.notna(df.iloc[row_number, 4]) else df.iloc[row_number, 3]
     }]
     # else:
     #     print(f"Value '{name}' not found in the DataFrame")

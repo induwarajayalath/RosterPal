@@ -172,7 +172,7 @@
                     <tr>
                         <th>Date</th>
                         <th>Shift</th>
-                        <th>Leave</th>
+                        <!-- <th>Leave</th> -->
                     </tr>
                 </thead>
                 <tbody>
@@ -246,8 +246,8 @@
             // Format date to YYYY/MM/DD
             const formattedDate = new Date(date).toISOString().split('T')[0].replace(/-/g, '/');
 
-            //const url = `http://127.0.0.1:5000/getRoster/${formattedDate}/${name}`;
-            const url = `http://rosterpal.induwara.me/getRoster/${formattedDate}/${name}`;
+            const url = `http://127.0.0.1:5000/getRoster/${formattedDate}/${name}`;
+            //const url = `http://rosterpal.induwara.me/getRoster/${formattedDate}/${name}`;
 
             // Make GET request
             fetch(url)
@@ -267,7 +267,7 @@
                         const nameRow = document.createElement('tr');
                         const nameCell = document.createElement('td');
                         nameCell.colSpan = 3;
-                        nameCell.innerHTML = `Name: ${data[0].Name}<br>Roster: ${data[0].Roster}`;
+                        nameCell.innerHTML = `Name: ${data[0].Name}<br>Roster: ${data[0].Roster}<br>Capability: ${data[0].Capability}`;
                         nameCell.style.fontWeight = 'bold';
                         nameRow.appendChild(nameCell);
                         responseTableBody.appendChild(nameRow);
@@ -281,11 +281,11 @@
                                     dateCell.textContent = item.Date;
                                     const shiftCell = document.createElement('td');
                                     shiftCell.textContent = item.Shift;
-                                    const leaveCell = document.createElement('td');
-                                    leaveCell.textContent = item.Leave;
+                                    // const leaveCell = document.createElement('td');
+                                    // leaveCell.textContent = item.Leave;
                                     row.appendChild(dateCell);
                                     row.appendChild(shiftCell);
-                                    row.appendChild(leaveCell);
+                                    // row.appendChild(leaveCell);
                                     responseTableBody.appendChild(row);
                                 });
                             }
@@ -309,7 +309,7 @@
 
                     // Clear previous data
                     responseTableBody.innerHTML = '';
-                    responseText.textContent = 'Error fetching data.';
+                    responseText.textContent = 'Nothing was found or Something went wrong';
 
                     // Display error message
                     responseTableBody.style.display = 'none';
